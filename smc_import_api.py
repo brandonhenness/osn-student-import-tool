@@ -1,9 +1,14 @@
-from gluon import current
+# Existing imports go here
+
+from gluon import current, HTTP
 import json
 import uuid
 from datetime import datetime
 import traceback
 
+IMPORT_API_TOKEN = "CHANGE_ME_IMPORT_TOKEN"
+
+# Existing code goes here
 
 @request.restful()
 def student_import_api():
@@ -44,9 +49,8 @@ def student_import_api():
 
             # 2. Shared-secret auth
             token = data.get('token')
-            expected = "CHANGE_ME_IMPORT_TOKEN"  # <-- keep in sync with Excel
-            if token != expected:
-                raise Exception("Forbidden: invalid token")
+            if token != IMPORT_API_TOKEN:
+                raise HTTP(403, "Forbidden: invalid token")
 
             # 3. Options
             erase_pw = bool(data.get('erase_current_password', False))

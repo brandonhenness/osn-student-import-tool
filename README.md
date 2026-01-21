@@ -30,7 +30,11 @@ Both workflows share user attributes pulled from Active Directory.
 
 ### SMC (web2py) Setup (Required for SMC Import)
 
-The SMC import API must be added to the `smc` application.
+The SMC import API must be added to the `smc` application. The required code is in:
+
+```
+smc/smc_import_api.py
+```
 
 #### **1. Open SMC design interface**
 
@@ -56,22 +60,28 @@ controllers → import.py → Edit
 
 Do not remove or overwrite existing code.
 
-#### **3. Add imports at top of file**
+#### **3. Add API Imports + Constant (from smc_import_api.py)**
 
-Ensure the following exist:
+At the **top of `import.py`**, add (or verify):
 
 ```python
+from gluon import current
+
 import json
 import uuid
-from datetime import datetime
 import traceback
+from datetime import datetime
+
+IMPORT_API_TOKEN = "CHANGE_ME_IMPORT_TOKEN"
 ```
 
-If duplicates exist, leave them.
+> **Important:** Change the token to a secure random value. Treat it like a password.
 
-#### **4. Append new SMC import API at bottom of file**
+These lines are taken directly from `smc_import_api.py`.
 
-Scroll to the bottom and append the:
+#### **4. Append API Functions (from smc_import_api.py)**
+
+Scroll to the **bottom of `import.py`** and **append both of the following functions from `smc_import_api.py`:**
 
 ```
 @request.restful()
@@ -79,27 +89,38 @@ def student_import_api():
     ...
 ```
 
-This must be appended, not inserted into existing functions.
+and
 
-#### **5. Configure secure token**
-
-Inside the API, change:
-
-```python
-expected = "CHANGE_ME_IMPORT_TOKEN"
+```
+def _insert_student_into_queue_from_json(sheet_name, s):
+    ...
 ```
 
-to a randomly generated shared secret, for example:
+Important notes:
 
-```python
-expected = "X9z!sG4p7QdK38sw"
+- append both functions exactly as they appear in `smc_import_api.py`
+- keep them at the root level of the controller file
+- do not insert them inside existing functions
+- do not change indentation
+- do not remove or modify existing SMC code
+
+Both functions are required.  
+`student_import_api()` exposes the API endpoint, and  
+`_insert_student_into_queue_from_json()` handles inserting rows into `student_import_queue`.
+
+#### **5. Set matching token in Excel**
+
+In the workbook, open the `smc_config` table and set:
+
+```
+SMC_IMPORT_TOKEN = <your token>
 ```
 
-Token is treated as a password.
+This must match the value of `IMPORT_API_TOKEN` in SMC.
 
 #### **6. Save + Apply**
 
-web2py auto reloads after:
+web2py reloads automatically after:
 
 ```
 Save → Apply
@@ -113,7 +134,7 @@ The endpoint is located at:
 https://smc.<domain>/import/student_import_api.json
 ```
 
-Opening this in a browser without a POST will typically return:
+Opening in a browser without a POST will typically return:
 
 - `{"method":"POST"}` or
 - `"Method Not Allowed"` or
@@ -258,6 +279,7 @@ Useful for debugging Canvas provisioning or account collisions.
 ## Security Notes
 
 - Token is a shared secret (treat as password)
+- Token must be changed from default
 - Tokens may be rotated anytime
 - No firewall exposure required
 - Membership-based auth alternative available
