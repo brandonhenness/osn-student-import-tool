@@ -65,7 +65,7 @@ Do not remove or overwrite existing code.
 At the **top of `import.py`**, add (or verify):
 
 ```python
-from gluon import current
+from gluon import current, HTTP
 
 import json
 import uuid
