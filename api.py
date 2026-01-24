@@ -392,9 +392,11 @@ def api_users():
         # Safe whitelist: always present fields
         fields = [
             db.auth_user.id,
-            db.auth_user.email,
             db.auth_user.first_name,
             db.auth_user.last_name,
+            db.auth_user.email,
+            db.auth_user.username,
+            db.auth_user.password,
         ]
 
         # Optional commonly-present fields (include only if they exist)
